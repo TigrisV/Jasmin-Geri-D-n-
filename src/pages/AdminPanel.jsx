@@ -40,7 +40,7 @@ function AdminPanel() {
     const matchesStatus = filter === 'all' || f.status === filter
     const matchesType = typeFilter === 'all' || f.type === typeFilter
     const matchesSearch = f.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          f.roomNumber.toString().includes(searchTerm) ||
+                          (f.roomNumber && f.roomNumber.toString().includes(searchTerm)) ||
                           (f.guestName && f.guestName.toLowerCase().includes(searchTerm.toLowerCase()))
     return matchesStatus && matchesType && matchesSearch
   })
@@ -62,34 +62,6 @@ function AdminPanel() {
       default:
         return null
     }
-  }
-
-  const getPriorityBadge = (priority) => {
-    const colors = {
-      dusuk: 'bg-green-100 text-green-700',
-      normal: 'bg-blue-100 text-blue-700',
-      yuksek: 'bg-orange-100 text-orange-700',
-      acil: 'bg-red-100 text-red-700'
-    }
-    const labels = {
-      dusuk: 'Düşük',
-      normal: 'Normal',
-      yuksek: 'Yüksek',
-      acil: 'Acil'
-    }
-    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[priority]}`}>
-      {labels[priority]}
-    </span>
-  }
-
-  const getCategoryLabel = (category) => {
-    const labels = {
-      genel: 'Genel',
-      temizlik: 'Temizlik',
-      teknik: 'Teknik Sorun',
-      havlu_nevresim: 'Havlu & Nevresim'
-    }
-    return labels[category] || category
   }
 
   const stats = {
@@ -238,10 +210,6 @@ function AdminPanel() {
                       }`}>
                         {feedback.type === 'sikayet' ? '⚠️ Şikayet' : '💡 İstek'}
                       </span>
-                      <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-medium">
-                        {getCategoryLabel(feedback.category)}
-                      </span>
-                      {getPriorityBadge(feedback.priority)}
                       {getStatusBadge(feedback.status)}
                     </div>
                     {feedback.guestName && (

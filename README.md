@@ -55,7 +55,7 @@ Deploy ettikten sonra:
 | Sayfa | URL | Açıklama |
 |-------|-----|----------|
 | Ana Sayfa | `/` | Admin yönetim paneli |
-| Geri Bildirim | `/feedback/:oda` | Misafir formu (QR ile) |
+| Geri Bildirim | `/feedback` | Misafir formu (QR ile) |
 | QR Generator | `/qr-generator` | QR kod oluşturma |
 | E-posta Ayarları | `/email-settings` | Bildirim ayarları |
 | Admin Panel | `/admin` | Geri bildirim yönetimi |

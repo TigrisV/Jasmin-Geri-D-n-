@@ -10,7 +10,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/feedback/:roomNumber" element={<FeedbackForm />} />
+        <Route path="/feedback" element={<FeedbackForm />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/qr-generator" element={<QRGenerator />} />
         <Route path="/email-settings" element={<EmailSettings />} />

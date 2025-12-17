@@ -1,29 +1,15 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { Hotel, ArrowLeft, Download, Plus, Trash2, Printer, QrCode } from 'lucide-react'
+import { ArrowLeft, Download, Printer, QrCode } from 'lucide-react'
 
 function QRGenerator() {
-  const [rooms, setRooms] = useState([{ id: 1, number: '101' }])
   const [baseUrl, setBaseUrl] = useState(window.location.origin)
-  const printRef = useRef()
 
-  const addRoom = () => {
-    const lastRoom = rooms[rooms.length - 1]
-    const nextNumber = lastRoom ? parseInt(lastRoom.number) + 1 : 101
-    setRooms([...rooms, { id: Date.now(), number: nextNumber.toString() }])
-  }
+  const feedbackUrl = `${baseUrl}/feedback`
 
-  const removeRoom = (id) => {
-    setRooms(rooms.filter(r => r.id !== id))
-  }
-
-  const updateRoomNumber = (id, number) => {
-    setRooms(rooms.map(r => r.id === id ? { ...r, number } : r))
-  }
-
-  const downloadQR = (roomNumber) => {
-    const svg = document.getElementById(`qr-${roomNumber}`)
+  const downloadQR = () => {
+    const svg = document.getElementById('qr-feedback')
     const svgData = new XMLSerializer().serializeToString(svg)
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
@@ -37,7 +23,7 @@ function QRGenerator() {
       ctx.drawImage(img, 0, 0)
       
       const link = document.createElement('a')
-      link.download = `oda-${roomNumber}-qr.png`
+      link.download = 'geri-bildirim-qr.png'
       link.href = canvas.toDataURL('image/png')
       link.click()
     }
@@ -45,27 +31,24 @@ function QRGenerator() {
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
   }
 
-  const printAllQRs = () => {
+  const printQR = () => {
     const printContent = document.getElementById('print-area')
     const printWindow = window.open('', '', 'width=800,height=600')
     
     printWindow.document.write(`
       <html>
         <head>
-          <title>QR Kodları Yazdır</title>
+          <title>QR Kod Yazdır</title>
           <style>
-            body { font-family: Arial, sans-serif; }
+            body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
             .qr-card {
-              display: inline-block;
-              padding: 20px;
-              margin: 10px;
+              padding: 40px;
               border: 2px solid #ddd;
               border-radius: 10px;
               text-align: center;
-              page-break-inside: avoid;
             }
-            .qr-card h3 { margin: 0 0 10px 0; color: #1e3a5f; }
-            .qr-card p { margin: 10px 0 0 0; font-size: 12px; color: #666; }
+            .qr-card h3 { margin: 0 0 20px 0; color: #1e3a5f; font-size: 24px; }
+            .qr-card p { margin: 20px 0 0 0; font-size: 14px; color: #666; }
             @media print {
               .qr-card { border: 2px solid #000; }
             }
@@ -83,23 +66,6 @@ function QRGenerator() {
       printWindow.print()
       printWindow.close()
     }, 250)
-  }
-
-  const generateBulkRooms = () => {
-    const start = prompt('Başlangıç oda numarası:', '101')
-    const end = prompt('Bitiş oda numarası:', '110')
-    
-    if (start && end) {
-      const startNum = parseInt(start)
-      const endNum = parseInt(end)
-      const newRooms = []
-      
-      for (let i = startNum; i <= endNum; i++) {
-        newRooms.push({ id: Date.now() + i, number: i.toString() })
-      }
-      
-      setRooms(newRooms)
-    }
   }
 
   return (
@@ -136,95 +102,49 @@ function QRGenerator() {
               QR kodun yönlendireceği temel URL (deploy ettikten sonra güncelleyin)
             </p>
           </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={addRoom}
-              className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Oda Ekle
-            </button>
-            <button
-              onClick={generateBulkRooms}
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <QrCode className="w-4 h-4" />
-              Toplu Oluştur
-            </button>
-            <button
-              onClick={printAllQRs}
-              className="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              <Printer className="w-4 h-4" />
-              Tümünü Yazdır
-            </button>
-          </div>
         </div>
 
-        {/* QR Codes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="print-area">
-          {rooms.map((room) => (
-            <div
-              key={room.id}
-              className="qr-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-center"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <input
-                  type="text"
-                  value={room.number}
-                  onChange={(e) => updateRoomNumber(room.id, e.target.value)}
-                  className="w-20 text-center text-lg font-bold text-gray-800 border border-gray-200 rounded-lg px-2 py-1 focus:border-emerald-500 outline-none"
-                />
-                <button
-                  onClick={() => removeRoom(room.id)}
-                  className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg inline-block border-2 border-gray-100">
-                <QRCodeSVG
-                  id={`qr-${room.number}`}
-                  value={`${baseUrl}/feedback/${room.number}`}
-                  size={150}
-                  level="H"
-                  includeMargin={true}
-                />
-              </div>
-
-              <div className="mt-4">
-                <p className="text-sm text-gray-500 mb-3">Oda {room.number}</p>
-                <button
-                  onClick={() => downloadQR(room.number)}
-                  className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 text-sm font-medium"
-                >
-                  <Download className="w-4 h-4" />
-                  İndir
-                </button>
-              </div>
-
-              <p className="text-xs text-gray-400 mt-3 break-all">
-                {baseUrl}/feedback/{room.number}
-              </p>
+        {/* Single QR Code */}
+        <div className="max-w-md mx-auto">
+          <div className="qr-card bg-white rounded-xl p-8 shadow-sm border border-gray-100 text-center" id="print-area">
+            <h3 className="text-xl font-bold text-gray-800 mb-6">Geri Bildirim QR Kodu</h3>
+            
+            <div className="bg-white p-4 rounded-lg inline-block border-2 border-gray-100">
+              <QRCodeSVG
+                id="qr-feedback"
+                value={feedbackUrl}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
             </div>
-          ))}
-        </div>
 
-        {rooms.length === 0 && (
-          <div className="bg-white rounded-xl p-12 shadow-sm border border-gray-100 text-center">
-            <QrCode className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">Henüz oda eklenmedi</p>
-            <button
-              onClick={addRoom}
-              className="mt-4 inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              İlk Odayı Ekle
-            </button>
+            <p className="text-sm text-gray-500 mt-6 mb-4">
+              Bu QR kodu tüm odalarda kullanabilirsiniz
+            </p>
+
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={downloadQR}
+                className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                İndir
+              </button>
+              <button
+                onClick={printQR}
+                className="inline-flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <Printer className="w-4 h-4" />
+                Yazdır
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-400 mt-6 break-all">
+              {feedbackUrl}
+            </p>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

@@ -1,26 +1,16 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
 import { Hotel, Send, CheckCircle, AlertTriangle, Lightbulb } from 'lucide-react'
 import { sendEmailNotification } from '../utils/emailService'
 
 function FeedbackForm() {
-  const { roomNumber } = useParams()
-  const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
     guestName: '',
+    roomNumber: '',
     type: 'istek',
-    category: 'genel',
-    message: '',
-    priority: 'normal'
+    message: ''
   })
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const categories = [
-    { value: 'genel', label: 'Genel' },
-    { value: 'temizlik', label: 'Temizlik' },
-    { value: 'teknik', label: 'Teknik Sorun' },
-    { value: 'havlu_nevresim', label: 'Havlu & Nevresim' }
-  ]
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -30,7 +20,6 @@ function FeedbackForm() {
     const feedbacks = JSON.parse(localStorage.getItem('hotelFeedbacks') || '[]')
     const newFeedback = {
       id: Date.now(),
-      roomNumber,
       ...formData,
       status: 'beklemede',
       createdAt: new Date().toISOString()
@@ -62,7 +51,7 @@ function FeedbackForm() {
           </p>
           <div className="bg-emerald-50 rounded-xl p-4 mb-6">
             <p className="text-sm text-emerald-700">
-              <span className="font-semibold">Oda:</span> {roomNumber}
+              <span className="font-semibold">Oda:</span> {formData.roomNumber}
             </p>
             <p className="text-sm text-emerald-700">
               <span className="font-semibold">Tür:</span> {formData.type === 'istek' ? 'İstek' : 'Şikayet'}
@@ -85,14 +74,26 @@ function FeedbackForm() {
               Geri Bildirim Formu
             </h1>
           </div>
-          <div className="inline-block bg-amber-400 text-blue-900 px-4 py-1 rounded-full text-sm font-semibold">
-            Oda {roomNumber}
-          </div>
-        </div>
+                  </div>
 
         {/* Form */}
         <div className="max-w-lg mx-auto">
           <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 md:p-8 shadow-2xl">
+            {/* Oda Numarası */}
+            <div className="mb-5">
+              <label className="block text-gray-700 font-medium mb-2">
+                Oda Numarası <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.roomNumber}
+                onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                placeholder="Örn: 101"
+              />
+            </div>
+
             {/* İsim */}
             <div className="mb-5">
               <label className="block text-gray-700 font-medium mb-2">
@@ -137,55 +138,6 @@ function FeedbackForm() {
                   <AlertTriangle className="w-5 h-5" />
                   <span className="font-medium">Şikayet</span>
                 </button>
-              </div>
-            </div>
-
-            {/* Kategori */}
-            <div className="mb-5">
-              <label className="block text-gray-700 font-medium mb-2">
-                Kategori
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Öncelik */}
-            <div className="mb-5">
-              <label className="block text-gray-700 font-medium mb-2">
-                Öncelik
-              </label>
-              <div className="flex gap-2">
-                {[
-                  { value: 'dusuk', label: 'Düşük', color: 'green' },
-                  { value: 'normal', label: 'Normal', color: 'blue' },
-                  { value: 'yuksek', label: 'Yüksek', color: 'orange' },
-                  { value: 'acil', label: 'Acil', color: 'red' }
-                ].map((p) => (
-                  <button
-                    key={p.value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, priority: p.value })}
-                    className={`flex-1 py-2 px-2 rounded-lg text-sm font-medium transition-all ${
-                      formData.priority === p.value
-                        ? p.color === 'green' ? 'bg-green-500 text-white'
-                        : p.color === 'blue' ? 'bg-blue-500 text-white'
-                        : p.color === 'orange' ? 'bg-orange-500 text-white'
-                        : 'bg-red-500 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
               </div>
             </div>
 
